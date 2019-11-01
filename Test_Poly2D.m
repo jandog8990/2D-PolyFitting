@@ -3,6 +3,9 @@
 % ---------------------------------------------
 
 %Poly2D (x_low, x_hi, xd, y_low, y_hi, yd, MaxDegreeX, MaxDegreeY)
+clear all
+close all
+clc
 
 % Init the low and hi intervals
 x_low = -2;
@@ -16,4 +19,6 @@ MaxDegreeX = 3;
 MaxDegreeY = 3;
 
 % Create a generic 2d poly object
-tdobj = Poly2D(x_low, x_hi, xd, y_low, y_hi, yd, MaxDegreeX, MaxDegreeY)
+polyObj = Poly2D(x_low, x_hi, xd, y_low, y_hi, yd, MaxDegreeX, MaxDegreeY);
+% polyObj.setComponents(MaxDegreeX, MaxDegreeY);
+

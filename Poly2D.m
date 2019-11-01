@@ -8,6 +8,9 @@ classdef Poly2D < handle
         y_low = 0
         y_hi  = 0
         yd = 0
+        
+        xvec = []   % empty data vectors for poly plots
+        yvec = []
        
         X = []         % X coordinates.
         Y = []         % Y coordinates.
@@ -38,10 +41,10 @@ classdef Poly2D < handle
         %% Main constructor based on the class name.
         % Create the default coordinate system and the 2D polynomials. 
 
-        function imgObj = Poly2D (x_low, x_hi, xd, y_low, y_hi, yd, MaxDegreeX, MaxDegreeY)
+        function imgObj = Poly2D(x_low, x_hi, xd, y_low, y_hi, yd, MaxDegreeX, MaxDegreeY)
            if (nargin>0)
-               setRectCoords(imgObj, x_low, xd, x_hi, y_low, y_hi, yd);
-               setComponents(MaxDegreeX, MaxDegreeY);
+               setRectCoords(imgObj, x_low, x_hi, xd, y_low, y_hi, yd);
+               setComponents(imgObj, MaxDegreeX, MaxDegreeY);
            end
         end    
 
@@ -53,17 +56,21 @@ classdef Poly2D < handle
         % Outputs: X, Y coordinates stored internally.
         function [] = setRectCoords(imgObj, x_low, x_hi, xd, y_low, y_hi, yd)
             % Use meshgrid() here.
+            
+            % Setup the low and hi for x vector
             imgObj.x_low = x_low;
             imgObj.x_hi  = x_hi;
             imgObj.xd = xd;
+            
+            % Setup the low and hi for y vector
             imgObj.y_low = y_low;
             imgObj.y_hi  = y_hi;
             imgObj.yd = yd;
             
             % Create the xvec and yvec for the mesh grid (plots polys)
-            xvec = x_low:xd:x_hi;
-            yvec = y_low:yd:y_hi;
-            [imgObj.X, imgObj.Y] = meshgrid(xvec, yvec);
+            imgObj.xvec = x_low:xd:x_hi;
+            imgObj.yvec = y_low:yd:y_hi;
+            [imgObj.X, imgObj.Y] = meshgrid(imgObj.xvec, imgObj.yvec);
         end
 
         %% setComponents():
@@ -71,12 +78,16 @@ classdef Poly2D < handle
         % Inputs:  MaxDegreeX, MaxDegreeY
         % Outputs: Sets up the Components and ComponentNames
         %          as described above.
-        function [] = setComponents(MaxDegreeX, MaxDegreeY)        
+        function [Z] = setComponents(imgObj, MaxDegreeX, MaxDegreeY)        
             % Store the Parameters
             imgObj.MaxDegreeX = MaxDegreeX;
             imgObj.MaxDegreeY = MaxDegreeY;
 
-            % ...
+            % Create a simple poly for testing
+            X = imgObj.X;
+            Y = imgObj.Y;
+            Z = X.*exp(-X.^2 - Y.^2);
+            surf(X,Y,Z);
         end
 
             %% components2Matrix
