@@ -3,7 +3,7 @@ clear
 close all
 
 format long
-% n is the polynomial degree
+% m is rows n is the polynomial degree
 m = 10;
 % n = 15;
 n = 4;
@@ -31,6 +31,7 @@ disp(sprintf("theta = %f", theta));
 disp(sprintf("eta   = %f", eta));
 disp(" ");
 
+% Compute these after we have figured out the 2D poly funcs
 disp("Householder Triangulation")
 tic
 [Q,R] = qr(A,0);

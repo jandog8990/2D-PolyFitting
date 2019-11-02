@@ -20,5 +20,5 @@ MaxDegreeY = 3;
 
 % Create a generic 2d poly object
 polyObj = Poly2D(x_low, x_hi, xd, y_low, y_hi, yd, MaxDegreeX, MaxDegreeY);
-% polyObj.setComponents(MaxDegreeX, MaxDegreeY);
+polyObj.components2Matrix();
 

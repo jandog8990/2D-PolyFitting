@@ -82,12 +82,25 @@ classdef Poly2D < handle
             % Store the Parameters
             imgObj.MaxDegreeX = MaxDegreeX;
             imgObj.MaxDegreeY = MaxDegreeY;
-
+            
+            % Set up the components for the matrix
+            degOrder = MaxDegreeX*MaxDegreeY;
+%             C = sym('c_%d', [1 degOrder]); % single vector poly
+            C = sym('c_%d_%d', [5 degOrder]);
+            xs = sym('x');
+            disp("Coefficient vector:");
+            disp(C);
+            disp("\n");
+            poly = poly2sym(C(1,:), xs);
+            disp("Poly 2 Sym Output:");
+            disp(poly);
+            disp("\n");
+            
             % Create a simple poly for testing
             X = imgObj.X;
             Y = imgObj.Y;
-            Z = X.*exp(-X.^2 - Y.^2);
-            surf(X,Y,Z);
+%             Z = X.*exp(-X.^2 - Y.^2);
+%             surf(X,Y,Z);
         end
 
             %% components2Matrix
@@ -99,10 +112,27 @@ classdef Poly2D < handle
         % TODO: How does this look visually? 1 poly per col? Or for
         % each entry in the Poly matrix we have an associated vector??
         % --------------------------------------------------------------
-        function [poly_matrix] = components2Matrix(poly)
-            disp("Comp 2 mat:")
-            disp("poly:")
-            disp(poly)
+%         function [poly_matrix] = components2Matrix(poly)
+        function [poly_matrix] = components2Matrix(imgObj)
+            disp("Comp 2 mat poly_matrix:")
+            x = 1:10;
+            x0 = ones(1,10);
+            x1 = x;
+            x2 = x.^2;
+            x3 = x.^3;
+            M = 5; N = 1;
+            poly_matrix(:,:,1) = repmat(x0, M, N);
+            poly_matrix(:,:,2) = repmat(x1, M, N);
+            poly_matrix(:,:,3) = repmat(x2, M, N);
+            disp("Poly Matrix 3 Size:");
+            disp(poly_matrix);
+            disp("\n");
+            
+%             figure
+%             plot(poly_matrix(:,:,3));
+            
+            % Create test polys
+            
         end
 
         %% matrix2Components
@@ -114,7 +144,7 @@ classdef Poly2D < handle
         % TODO: How does this look visually? 1 poly per col? Or for
         % each entry in the Poly matrix we have an associated vector??
         % --------------------------------------------------------------
-        function poly = matrix2Components(matrix)
+        function poly = matrix2Components(imgObj, matrix)
         end
       
     end % End of standard methods
