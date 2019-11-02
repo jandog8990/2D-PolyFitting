@@ -15,6 +15,9 @@ classdef Poly2D < handle
         X = []         % X coordinates.
         Y = []         % Y coordinates.
         
+        M = 0;         % row dimensionality for the poly image
+        N = 0;         % col dimensionality for the poly image
+        
         MaxDegreeX = 0 % The maximum polynomial degree for the X-coordinate.
         MaxDegreeY = 0 % The maximum polynomial degree for the Y-coordinate.
         
@@ -41,10 +44,11 @@ classdef Poly2D < handle
         %% Main constructor based on the class name.
         % Create the default coordinate system and the 2D polynomials. 
 
-        function imgObj = Poly2D(x_low, x_hi, xd, y_low, y_hi, yd, MaxDegreeX, MaxDegreeY)
+        function imgObj = Poly2D(x_low, x_hi, xd, y_low, y_hi, yd,...
+                MaxDegreeX, MaxDegreeY, M, N)
            if (nargin>0)
                setRectCoords(imgObj, x_low, x_hi, xd, y_low, y_hi, yd);
-               setComponents(imgObj, MaxDegreeX, MaxDegreeY);
+               setComponents(imgObj, MaxDegreeX, MaxDegreeY, M, N);
            end
         end    
 
@@ -75,30 +79,36 @@ classdef Poly2D < handle
 
         %% setComponents():
         % This function generates a rectangular coordinate system.
-        % Inputs:  MaxDegreeX, MaxDegreeY
+        % Inputs:  
+        %   MaxDegreeX - x poly max degree
+        %   MaxDegreeY - y poly max degree
+        %   M - row dimension for image
+        %   N - column dimension for image
         % Outputs: Sets up the Components and ComponentNames
         %          as described above.
-        function [Z] = setComponents(imgObj, MaxDegreeX, MaxDegreeY)        
+        function [Z] = setComponents(imgObj, MaxDegreeX, MaxDegreeY, M, N)
             % Store the Parameters
             imgObj.MaxDegreeX = MaxDegreeX;
             imgObj.MaxDegreeY = MaxDegreeY;
-            
-            % Set up the components for the matrix
+            imgObj.M = M;
+            imgObj.N = N;
             degOrder = MaxDegreeX*MaxDegreeY;
-%             C = sym('c_%d', [1 degOrder]); % single vector poly
-            C = sym('c_%d_%d', [5 degOrder]);
-            xs = sym('x');
-            disp("Coefficient vector:");
-            disp(C);
-            disp("\n");
-            poly = poly2sym(C(1,:), xs);
-            disp("Poly 2 Sym Output:");
-            disp(poly);
-            disp("\n");
+            
+            % Create the 1D matrix for 1, x, x2, x3, x4
+            idx = (0:M-1)';
+            x = idx/(M-1);
+            A = [];
+            for i = 1:N
+                A = [A x.^(i-1)];
+                [rows,cols] = size(A);
+                disp(sprintf("A matrix (size [%d, %d])", rows, cols));
+                disp(A);
+                disp("\n");
+            end
             
             % Create a simple poly for testing
-            X = imgObj.X;
-            Y = imgObj.Y;
+%             X = imgObj.X;
+%             Y = imgObj.Y;
 %             Z = X.*exp(-X.^2 - Y.^2);
 %             surf(X,Y,Z);
         end
