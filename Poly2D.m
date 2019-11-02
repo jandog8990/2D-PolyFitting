@@ -1,3 +1,10 @@
+% ------------------------------------------------
+% Poly2D Class
+%
+% This class takes 2D polynomials and converts
+% to matrix form where each column is a poly,
+% and vicer versa from matrices to 2D polys
+% ------------------------------------------------
 classdef Poly2D < handle
     
     properties
@@ -8,6 +15,9 @@ classdef Poly2D < handle
         y_low = 0
         y_hi  = 0
         yd = 0
+        
+        polyNames = ["1", "x", "y", "xy", "x^2", "y^2",...
+            "xy^2", "x^2y", "x^2y^2"];
         
         xvec = []   % empty data vectors for poly plots
         yvec = []
@@ -26,7 +36,7 @@ classdef Poly2D < handle
                         % in 2D arrays:
                         %   Components(:,:,1) = 1;
                         %   Components(:,:,2) = x; ...
-        ComponentNames = [] % Array os strings that contains the names.
+        ComponentNames = ("") % Array os strings that contains the names.
                         % If constructed using "setComponents()" the names
                         % are:
                         %   ComponentNames(1) = "1";
@@ -90,22 +100,45 @@ classdef Poly2D < handle
             % Store the Parameters
             imgObj.MaxDegreeX = MaxDegreeX;
             imgObj.MaxDegreeY = MaxDegreeY;
-            imgObj.M = M;
-            imgObj.N = N;
+            imgObj.M = M;   % number of rows (num eqs)
+            imgObj.N = N;   % number of cols (poly deg)
             degOrder = MaxDegreeX*MaxDegreeY;
             
             % Create the 1D matrix for 1, x, x2, x3, x4
             idx = (0:M-1)';
             x = idx/(M-1);
+            y = idx/(M+N-1);
             A = [];
             for i = 1:N
                 A = [A x.^(i-1)];
                 [rows,cols] = size(A);
-                disp(sprintf("A matrix (size [%d, %d])", rows, cols));
-                disp(A);
-                disp("\n");
             end
+            disp(sprintf("1D Test Matrix (size [%d, %d])", rows, cols));
+            disp(A);
+            disp("\n");
             
+            % Create monomial 3D array (1, x, y, xy, x^2, y^2,...)
+            % NOTE: Here I represent the poly as individual componets
+            % TODO: Will want to group the 2D poly matrix according to N
+            %       the group number
+            poly_matrix = zeros(M,N,N);
+            for i = 1:N
+                tmpx = x.^(i-1);
+                poly_matrix(:,:,i) = repmat(tmpx, 1, N);
+            end
+            imgObj.Components = poly_matrix;
+            disp("2D Poly Components:");
+            disp(imgObj.Components);
+            disp("\n");
+            
+            % Set the component names from the degree of the poly
+            for i = 1:N
+                imgObj.ComponentNames(i) = imgObj.polyNames(i);
+            end
+            disp("Copmonent Names:");
+            disp(imgObj.ComponentNames);
+            disp("\n");
+
             % Create a simple poly for testing
 %             X = imgObj.X;
 %             Y = imgObj.Y;
@@ -123,25 +156,9 @@ classdef Poly2D < handle
         % each entry in the Poly matrix we have an associated vector??
         % --------------------------------------------------------------
 %         function [poly_matrix] = components2Matrix(poly)
-        function [poly_matrix] = components2Matrix(imgObj)
-            disp("Comp 2 mat poly_matrix:")
-            x = 1:10;
-            x0 = ones(1,10);
-            x1 = x;
-            x2 = x.^2;
-            x3 = x.^3;
-            M = 5; N = 1;
-            poly_matrix(:,:,1) = repmat(x0, M, N);
-            poly_matrix(:,:,2) = repmat(x1, M, N);
-            poly_matrix(:,:,3) = repmat(x2, M, N);
-            disp("Poly Matrix 3 Size:");
-            disp(poly_matrix);
-            disp("\n");
+        function [poly_matrix] = poly2Matrix(imgObj)
             
-%             figure
-%             plot(poly_matrix(:,:,3));
-            
-            % Create test polys
+            % Create 2D ply matrix from the components matrix
             
         end
 
@@ -154,7 +171,7 @@ classdef Poly2D < handle
         % TODO: How does this look visually? 1 poly per col? Or for
         % each entry in the Poly matrix we have an associated vector??
         % --------------------------------------------------------------
-        function poly = matrix2Components(imgObj, matrix)
+        function poly = matrix2Poly(imgObj, matrix)
         end
       
     end % End of standard methods
