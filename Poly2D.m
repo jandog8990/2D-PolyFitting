@@ -95,11 +95,14 @@ classdef Poly2D < handle
             imgObj.MaxDegreeX = MaxDegreeX;
             imgObj.MaxDegreeY = MaxDegreeY;
             
-            % Create a simple poly for testing
-            X = imgObj.X;
-            Y = imgObj.Y;
-            Z = X.*exp(-X.^2 - Y.^2);
-            surf(X,Y,Z);
+%             % Create a simple poly for testing
+%             X = imgObj.X;
+%             Y = imgObj.Y;
+%             Z = X.*exp(-X.^2 - Y.^2);
+%             surf(X,Y,Z);
+            
+            % Create the 3D matrices for components using xvec/yvec
+            
         end
         
         % Create 2D Poly by combining 1D X and Y matrices
