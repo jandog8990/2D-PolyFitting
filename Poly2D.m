@@ -115,6 +115,9 @@ classdef Poly2D < handle
             disp("\n");
             
             % Create the monomials and put them in vector
+            % TODO: Need to keep the order of the poly in the monomials
+            % currently we save as y,y^2,x,x^2, etc...
+            % HOW???
             syms x y mono
             p = 0;
             count = 1;
@@ -131,6 +134,10 @@ classdef Poly2D < handle
 
             disp("Final Monomial Vector:");
             disp(mono);
+            disp("\n");
+            
+            disp("Sorted Monomial:");
+            disp(sort(mono));
             disp("\n");
             
             % Create the monomial matrix from the symbolic monomical vector

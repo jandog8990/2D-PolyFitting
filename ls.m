@@ -14,12 +14,25 @@ A = [];
 for i=1:n
     A = [A t.^(i-1)];
     [M,N] = size(A);
-    disp(sprintf("A size = [%d, %d]", M, N));
-    disp(A)
-    disp("\n")
 end
+disp("Old A:");
+disp(A);
+disp("\n");
+
+% Temporary vector for testing polynomial order
+tmp = A(:,end);
+A(:,end) = A(:,2);
+A(:,2) = tmp;
+disp("New A:");
+disp(A);
+disp("\n");
+
 b = exp(sin(4*t));
 b = b/2006.787453080206;
+
+% disp("b vector:");
+% disp(b);
+% disp("\n");
 
 x = A\b;
 y = A*x;
