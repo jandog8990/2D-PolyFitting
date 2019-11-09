@@ -14,12 +14,13 @@ classdef Poly2D < handle
         y_low = 0
         y_hi  = 0
         
+        % Pixel sizes along X and Y
+        M = 0
+        N = 0
+        
         % x and y vec for plotting
         xvec = []
         yvec = []
-        
-        polyNames = ["1", "x", "y", "xy", "x^2", "y^2",...
-            "xy^2", "x^2y", "x^2y^2"];
        
         X = []         % X coordinates.
         Y = []         % Y coordinates.
@@ -51,9 +52,9 @@ classdef Poly2D < handle
         % Create the default coordinate system and the 2D polynomials. 
 
         function imgObj = Poly2D(x_low, x_hi, y_low, y_hi,...
-                MaxDegreeX, MaxDegreeY)
+                MaxDegreeX, MaxDegreeY, M, N)
            if (nargin>0)
-               setRectCoords(imgObj, x_low, x_hi, y_low, y_hi);
+               setRectCoords(imgObj, x_low, x_hi, y_low, y_hi, M, N);
                setComponents(imgObj, MaxDegreeX, MaxDegreeY);
            end
         end    
@@ -64,18 +65,30 @@ classdef Poly2D < handle
         % This function generates a rectangular coordinate system.
         % Inputs:  x_low, x_hi, y_low, y_hi.
         % Outputs: X, Y coordinates stored internally.
-        function [] = setRectCoords(imgObj, x_low, x_hi, y_low, y_hi)
-            % Use meshgrid() here.
+        function [] = setRectCoords(imgObj, x_low, x_hi, y_low, y_hi, M, N)
+            % Set pixel lengths along axes
+            imgObj.M = M;
+            imgObj.N = N;
             
             % Setup the low and hi for x vector
             imgObj.x_low = x_low;
             imgObj.x_hi  = x_hi;
-            imgObj.xvec = x_low:0.1:x_hi;
+            xlen = (abs(x_low) + abs(x_hi) + 1);
+            xd = xlen/M;
+            imgObj.xvec = x_low:xd:x_hi;
             
             % Setup the low and hi for y vector
             imgObj.y_low = y_low;
             imgObj.y_hi  = y_hi;
-            imgObj.yvec = y_low:0.1:y_hi;
+            ylen = (abs(y_low) + abs(y_hi) + 1);
+            yd = ylen/N;
+            imgObj.yvec = y_low:yd:y_hi;
+            
+            disp("Set Rect Coords:");
+            disp("M, N = " + M + ", " + N);
+            disp("X vec len = " + length(imgObj.xvec));
+            disp("Y vec len = " + length(imgObj.yvec));
+            disp("\n");
             
             % Create the mesh grid for poly plots
             [imgObj.X, imgObj.Y] = meshgrid(imgObj.xvec, imgObj.yvec);
@@ -94,15 +107,81 @@ classdef Poly2D < handle
             % Store the Parameters
             imgObj.MaxDegreeX = MaxDegreeX;
             imgObj.MaxDegreeY = MaxDegreeY;
+            X = imgObj.X;
+            Y = imgObj.Y;
+            disp("Set Components:");
+            disp("MaxDegreeX = " + MaxDegreeX);
+            disp("MaxDegreeY = " + MaxDegreeY);
+            disp("\n");
             
-%             % Create a simple poly for testing
-%             X = imgObj.X;
-%             Y = imgObj.Y;
-%             Z = X.*exp(-X.^2 - Y.^2);
-%             surf(X,Y,Z);
+            % Create the monomials and put them in vector
+            syms x y mono
+            p = 0;
+            count = 1;
+            for i = 0:1:MaxDegreeX
+                for j = 0:1:MaxDegreeY
+                    p = p + x.^i.*y.^j;
+                    mono(count) = x.^i.*y.^j;
+                    count = count + 1;
+                end
+            end
+            disp("Final 2D-Poly:");
+            disp(p);
+            disp("\n");
+
+            disp("Final Monomial Vector:");
+            disp(mono);
+            disp("\n");
             
-            % Create the 3D matrices for components using xvec/yvec
+            % Create the monomial matrix from the symbolic monomical vector
+            % loop through monomials and create 3D matrix
+            monoMatrix = [];
+            monoNames = [""];
+            for i = 1:length(mono)
+                m = mono(i);
+                monoNames(i) = string(m);
+                monoMatrix(:,:,i) = double(subs(m, {x,y}, {X,Y}));
+            end
+
+            % Display the contents of the monomial matrix
+            disp("Monomial Matrix:");
+            for i = 1:1:length(monoNames)
+                disp(monoNames(i));
+                disp(monoMatrix(:,:,i));
+                disp("\n");
+            end
             
+            % Create the old Z matrix using the symbolic poly
+            Zold = double(subs(p, {x,y}, {X, Y}));
+
+            % Sum: loop through all 2D matrices in the 3D mother
+            [M,N,P] = size(monoMatrix);
+            Znew = zeros(M,N);
+            for i = 1:1:P
+                Znew = Znew + monoMatrix(:,:,i);
+            end
+            
+            disp("Z old:");
+            disp(Zold);
+            disp("\n");
+
+            disp("Z New:");
+            disp(Znew);
+            disp("\n");
+
+            disp("Matrix Comparison (Zdiff):");
+            Zdiff = Znew - Zold;
+            disp(Zdiff);
+            disp("\n");
+
+            % Display the final Z matrices for the old way and new way
+            figure();
+            surf(X,Y,Zold);
+            title("Z old using symbols:");
+            
+            figure();
+            surf(X,Y,Znew);
+            title("Z new using matrices:");
         end
         
         % Create 2D Poly by combining 1D X and Y matrices
