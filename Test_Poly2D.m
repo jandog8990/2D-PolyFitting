@@ -55,18 +55,6 @@ for i = n1:n2
 end
 disp("\n");
 
-B = [];
-n1 = 2;
-n2 = 2;
-disp("B:");
-for i = 0:n1
-    for j = 0:n2
-        B = [B x.^i*y.^j];
-        disp(B);
-    end
-end
-disp("\n");
-
 % Test polynomial orders
 % Should always start with 0 for i,j on the first layer
 n1 = 1;
@@ -83,16 +71,48 @@ disp("\n");
 
 n1 = 2;
 n2 = 2;
+b = [b x.^n1 y.^n2];
 disp("Layered 2D Polys:");
 for i = 1:n1
     for j = 1:n2
         p = x.^i*y.^j;
         disp(p);
         ex = any(b == p);
+        disp("exists = " + ex);
         if (~any(b == p))
             b = [b p];
         end
+        disp(b);
     end
 end
-disp(b);
 disp("\n");
+
+% n1 = 3;
+% n2 = 3;
+% disp("Layered 2D Polys:");
+% for i = 2:n1
+%     for j = 2:n2
+%         p = x.^i*y.^j;
+%         disp(p);
+%         ex = any(b == p);
+%         disp("exists = " + ex);
+%         if (~any(b == p))
+%             b = [b p];
+%         end
+%         disp(b);
+%     end
+% end
+% disp("\n");
+
+B = [];
+n1 = 2;
+n2 = 2;
+disp("B:");
+for i = 0:n1
+    for j = 0:n2
+        B = [B x.^i*y.^j];
+    end
+end
+disp(B);
+disp("\n");
+
