@@ -87,25 +87,34 @@ for i = 1:n1
 end
 disp("\n");
 
-% n1 = 3;
-% n2 = 3;
-% disp("Layered 2D Polys:");
-% for i = 2:n1
-%     for j = 2:n2
-%         p = x.^i*y.^j;
-%         disp(p);
-%         ex = any(b == p);
-%         disp("exists = " + ex);
-%         if (~any(b == p))
-%             b = [b p];
-%         end
-%         disp(b);
-%     end
-% end
-% disp("\n");
+n1 = 3;
+n2 = 2;
+p1 = x.^n1;
+p2 = y.^n2;
+if (~any(b == p1))
+    b = [b p1];
+end
+if (~any(b == p2))
+    b = [b p2];
+end
+
+disp("Layered 2D Polys:");
+for i = 1:n1
+    for j = 1:n2
+        p = x.^i*y.^j;
+        disp(p);
+        ex = any(b == p);
+        disp("exists = " + ex);
+        if (~any(b == p))
+            b = [b p];
+        end
+        disp(b);
+    end
+end
+disp("\n");
 
 B = [];
-n1 = 2;
+n1 = 3;
 n2 = 2;
 disp("B:");
 for i = 0:n1
