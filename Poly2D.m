@@ -114,11 +114,71 @@ classdef Poly2D < handle
             disp("MaxDegreeY = " + MaxDegreeY);
             disp("\n");
             
+            % Create the component matrices
+            syms x y mono
+            
+            % first layer is the 0th
+            b = [];
+            n1 = 1;
+            n2 = 1;
+            disp("Layered 2D Polys:");
+            for i = 0:1
+                for j = 0:1
+                    b = [b x.^i*y.^j];
+                    disp(b);
+                end
+            end
+            disp("\n");
+
+            % Loop through the remaining orders and create the matrices
+            disp("New B:");
+            for n1 = 2:MaxDegreeX
+                for n2 = 2:MaxDegreeY
+                    % First add the new monomials for x and y for the
+                    % current degrees in the loops
+                    p1 = x.^n1;
+                    p2 = y.^n2;
+                    if (~any(b == p1))
+                        b = [b p1];
+                    end
+                    if (~any(b == p2))
+                        b = [b p2];
+                    end
+                    
+                    % Loop through remaning orders and create monomials
+                    for i = 1:n1
+                        for j = 1:n2
+                            p = x.^i*y.^j;
+                            disp(p);
+                            ex = any(b == p);
+                            disp("exists = " + ex);
+                            if (~any(b == p))
+                                b = [b p];
+                            end
+                            disp(b);
+                        end
+                    end 
+                end
+            end
+            disp("\n");
+            
+            % Final check on polynomials
+            B = [];
+            n1 = MaxDegreeX;
+            n2 = MaxDegreeY;
+            disp("B:");
+            for i = 0:n1
+                for j = 0:n2
+                    B = [B x.^i*y.^j];
+                end
+            end
+            disp(B);
+            disp("\n");
+            
             % Create the monomials and put them in vector
             % TODO: Need to keep the order of the poly in the monomials
             % currently we save as y,y^2,x,x^2, etc...
             % HOW???
-            syms x y mono
             p = 0;
             count = 1;
             for i = 0:1:MaxDegreeX
@@ -182,13 +242,13 @@ classdef Poly2D < handle
             disp("\n");
 
             % Display the final Z matrices for the old way and new way
-            figure();
-            surf(X,Y,Zold);
-            title("Z old using symbols:");
-            
-            figure();
-            surf(X,Y,Znew);
-            title("Z new using matrices:");
+%             figure();
+%             surf(X,Y,Zold);
+%             title("Z old using symbols:");
+%             
+%             figure();
+%             surf(X,Y,Znew);
+%             title("Z new using matrices:");
         end
         
         % Create 2D Poly by combining 1D X and Y matrices
