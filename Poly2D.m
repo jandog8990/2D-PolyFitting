@@ -121,17 +121,13 @@ classdef Poly2D < handle
             b = [];
             n1 = 1;
             n2 = 1;
-            disp("Layered 2D Polys:");
             for i = 0:1
                 for j = 0:1
                     b = [b x.^i*y.^j];
-                    disp(b);
                 end
             end
-            disp("\n");
 
             % Loop through the remaining orders and create the matrices
-            disp("New B:");
             for n1 = 2:MaxDegreeX
                 for n2 = 2:MaxDegreeY
                     % First add the new monomials for x and y for the
@@ -149,19 +145,22 @@ classdef Poly2D < handle
                     for i = 1:n1
                         for j = 1:n2
                             p = x.^i*y.^j;
-                            disp(p);
                             ex = any(b == p);
-                            disp("exists = " + ex);
                             if (~any(b == p))
                                 b = [b p];
                             end
-                            disp(b);
                         end
                     end 
                 end
             end
+            mono = b;
+
+            disp("Final Monomial Vector:");
+            disp("len mono = " + length(mono));
+            disp(mono);
             disp("\n");
             
+                        
             % Final check on polynomials
             B = [];
             n1 = MaxDegreeX;
@@ -175,10 +174,6 @@ classdef Poly2D < handle
             disp(B);
             disp("\n");
             
-            % Create the monomials and put them in vector
-            % TODO: Need to keep the order of the poly in the monomials
-            % currently we save as y,y^2,x,x^2, etc...
-            % HOW???
             p = 0;
             count = 1;
             for i = 0:1:MaxDegreeX
@@ -190,14 +185,6 @@ classdef Poly2D < handle
             end
             disp("Final 2D-Poly:");
             disp(p);
-            disp("\n");
-
-            disp("Final Monomial Vector:");
-            disp(mono);
-            disp("\n");
-            
-            disp("Sorted Monomial:");
-            disp(sort(mono));
             disp("\n");
             
             % Create the monomial matrix from the symbolic monomical vector
@@ -242,13 +229,13 @@ classdef Poly2D < handle
             disp("\n");
 
             % Display the final Z matrices for the old way and new way
-%             figure();
-%             surf(X,Y,Zold);
-%             title("Z old using symbols:");
-%             
-%             figure();
-%             surf(X,Y,Znew);
-%             title("Z new using matrices:");
+            figure();
+            surf(X,Y,Zold);
+            title("Z old using symbols:");
+            
+            figure();
+            surf(X,Y,Znew);
+            title("Z new using matrices:");
         end
         
         % Create 2D Poly by combining 1D X and Y matrices
