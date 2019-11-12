@@ -73,15 +73,17 @@ classdef Poly2D < handle
             % Setup the low and hi for x vector
             imgObj.x_low = x_low;
             imgObj.x_hi  = x_hi;
-            xlen = (abs(x_low) + abs(x_hi) + 1);
+            xlen = (abs(x_low) + abs(x_hi));
             xd = xlen/M;
+            x_low = x_low+xd;
             imgObj.xvec = x_low:xd:x_hi;
             
             % Setup the low and hi for y vector
             imgObj.y_low = y_low;
             imgObj.y_hi  = y_hi;
-            ylen = (abs(y_low) + abs(y_hi) + 1);
+            ylen = (abs(y_low) + abs(y_hi));
             yd = ylen/N;
+            y_low = y_low+yd;
             imgObj.yvec = y_low:yd:y_hi;
             
             disp("Set Rect Coords:");
@@ -189,44 +191,47 @@ classdef Poly2D < handle
             
             % Create the monomial matrix from the symbolic monomical vector
             % loop through monomials and create 3D matrix
-            monoMatrix = [];
-            monoNames = [""];
             for i = 1:length(mono)
                 m = mono(i);
-                monoNames(i) = string(m);
-                monoMatrix(:,:,i) = double(subs(m, {x,y}, {X,Y}));
+                ComponentNames(i) = string(m);
+                Components(:,:,i) = double(subs(m, {x,y}, {X,Y}));
             end
 
             % Display the contents of the monomial matrix
-            disp("Monomial Matrix:");
-            for i = 1:1:length(monoNames)
-                disp(monoNames(i));
-                disp(monoMatrix(:,:,i));
-                disp("\n");
-            end
+%             disp("Monomial Matrix:");
+%             for i = 1:1:length(ComponentNames)
+%                 disp(ComponentNames(i));
+%                 disp(Components(:,:,i));
+%                 disp("\n");
+%             end
+            
+            % Set the XY Components from the matrix calculations
+            imgObj.Components = Components;
+            imgObj.ComponentNames = ComponentNames;
             
             % Create the old Z matrix using the symbolic poly
             Zold = double(subs(p, {x,y}, {X, Y}));
 
             % Sum: loop through all 2D matrices in the 3D mother
-            [M,N,P] = size(monoMatrix);
+            [M,N,P] = size(Components);
             Znew = zeros(M,N);
             for i = 1:1:P
-                Znew = Znew + monoMatrix(:,:,i);
+                Znew = Znew + Components(:,:,i);
             end
             
-            disp("Z old:");
-            disp(Zold);
-            disp("\n");
-
-            disp("Z New:");
-            disp(Znew);
-            disp("\n");
-
-            disp("Matrix Comparison (Zdiff):");
             Zdiff = Znew - Zold;
-            disp(Zdiff);
-            disp("\n");
+            
+%             disp("Z old:");
+%             disp(Zold);
+%             disp("\n");
+% 
+%             disp("Z New:");
+%             disp(Znew);
+%             disp("\n");
+%             
+%             disp("Matrix Comparison (Zdiff):");
+%             disp(Zdiff);
+%             disp("\n");
 
             % Display the final Z matrices for the old way and new way
             figure();
@@ -238,10 +243,22 @@ classdef Poly2D < handle
             title("Z new using matrices:");
         end
         
-        % Create 2D Poly by combining 1D X and Y matrices
-        function [xyComponents] = create2DPolyComponents(imgObj, N)
+        % Get the X and Y Components matrix
+        function Components = getComponents(imgObj)
+            Components = imgObj.Components;
         end
-
+        
+        % Get the Component names vector (maps to Components matrix)
+        function ComponentNames = getComponentNames(imgObj)
+            ComponentNames = imgObj.ComponentNames;
+        end
+        
+        % Get the X and Y input matrices from the meshgrid
+        function [X,Y] = getXYData(imgObj)
+            X = imgObj.X;
+            Y = imgObj.Y;
+        end
+        
         %% components2Matrix
         % Components to matrix method for transferring the 2D polynomial 
         % to columns of 2D MatrixForm matrix
