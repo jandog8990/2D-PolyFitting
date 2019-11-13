@@ -28,10 +28,10 @@ disp("\n");
 % disp("size A = " + size(A));
 % disp("\n");
 
-b = exp(sin(4*t));
-b = b/2006.787453080206;
-% c = double(randn());
-% b = 1 + t + c;
+% b = exp(sin(4*t));
+% b = b/2006.787453080206;
+c = double(randn());
+b = 1 + t + c;
 
 disp("b vector:");
 disp(size(b));

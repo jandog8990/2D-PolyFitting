@@ -28,22 +28,22 @@ classdef Poly2D < handle
         MaxDegreeX = 0 % The maximum polynomial degree for the X-coordinate.
         MaxDegreeY = 0 % The maximum polynomial degree for the Y-coordinate.
 
-        Components = [] % 3D Array. Stores the monomial components:
-                         %   1, x, y, x.*y, x.^2, y.^2, etc
-                         % in 2D arrays:
-                         %   Components(:,:,1) = 1;
-                         %   Components(:,:,2) = x; ...
+        Components = []     % 3D Array. Stores the monomial components:
+                            %   1, x, y, x.*y, x.^2, y.^2, etc
+                            % in 2D arrays:
+                            %   Components(:,:,1) = 1;
+                            %   Components(:,:,2) = x; ...
         ComponentNames = ("") % Array os strings that contains the names.
-                        % If constructed using "setComponents()" the names
-                        % are:
-                        %   ComponentNames(1) = "1";
-                        %   ComponentNames(2) = "x"; ...
-                        % If constructed using "Matrix2Components()" the
-                        % names are:
-                        %   ComponentNames(1) ="M1";
-                        %   ComponentNames(2) ="Mx"; ...
-        MatrixForm = [] % Contains the 2D monomials along each column:
-                        %  MatrixForm(:,1) = 1; MatrixForm(:,2) = x; ...
+                            % If constructed using "setComponents()" the names
+                            % are:
+                            %   ComponentNames(1) = "1";
+                            %   ComponentNames(2) = "x"; ...
+                            % If constructed using "Matrix2Components()" the
+                            % names are:
+                            %   ComponentNames(1) ="M1";
+                            %   ComponentNames(2) ="Mx"; ...
+        MatrixForm = []     % Contains the 2D monomials along each column:
+                            %  MatrixForm(:,1) = 1; MatrixForm(:,2) = x; ...
     end
     
     %% The default methods assume that the first argument is the object:
@@ -56,6 +56,7 @@ classdef Poly2D < handle
            if (nargin>0)
                setRectCoords(imgObj, x_low, x_hi, y_low, y_hi, M, N);
                setComponents(imgObj, MaxDegreeX, MaxDegreeY);
+               setMatrixForm(imgObj);
            end
         end    
 
@@ -161,32 +162,18 @@ classdef Poly2D < handle
             disp("len mono = " + length(mono));
             disp(mono);
             disp("\n");
-            
                         
             % Final check on polynomials
             B = [];
             n1 = MaxDegreeX;
             n2 = MaxDegreeY;
-            disp("B:");
+            disp("Algo Monomial Vector:");
             for i = 0:n1
                 for j = 0:n2
                     B = [B x.^i*y.^j];
                 end
             end
             disp(B);
-            disp("\n");
-            
-            p = 0;
-            count = 1;
-            for i = 0:1:MaxDegreeX
-                for j = 0:1:MaxDegreeY
-                    p = p + x.^i.*y.^j;
-                    mono(count) = x.^i.*y.^j;
-                    count = count + 1;
-                end
-            end
-            disp("Final 2D-Poly:");
-            disp(p);
             disp("\n");
             
             % Create the monomial matrix from the symbolic monomical vector
@@ -197,50 +184,51 @@ classdef Poly2D < handle
                 Components(:,:,i) = double(subs(m, {x,y}, {X,Y}));
             end
 
-            % Display the contents of the monomial matrix
-%             disp("Monomial Matrix:");
-%             for i = 1:1:length(ComponentNames)
-%                 disp(ComponentNames(i));
-%                 disp(Components(:,:,i));
-%                 disp("\n");
-%             end
-            
             % Set the XY Components from the matrix calculations
             imgObj.Components = Components;
             imgObj.ComponentNames = ComponentNames;
-            
-            % Create the old Z matrix using the symbolic poly
-            Zold = double(subs(p, {x,y}, {X, Y}));
+        end
+        
+        % Set the MatrixForm for the 2D polynomial
+        function setMatrixForm(imgObj)
+            components = imgObj.Components;
+            componentNames = imgObj.ComponentNames;
+            for i = 1:1:length(componentNames)
+                comp = components(:,:,i);
+                comp = comp(:);
+                imgObj.MatrixForm = [imgObj.MatrixForm comp];
+            end
+        end
+        
+        % Visualize 2D Polynomial matrix from components
+        function view2DPolyMatrix(imgObj)
+            % initialize the system
+            syms x y
+            X = imgObj.X; Y = imgObj.Y;
+            MaxDegreeX = imgObj.MaxDegreeX;
+            MaxDegreeY = imgObj.MaxDegreeY;
+            Components = imgObj.Components;
 
             % Sum: loop through all 2D matrices in the 3D mother
             [M,N,P] = size(Components);
-            Znew = zeros(M,N);
+            polyMatrix = zeros(M,N);
             for i = 1:1:P
-                Znew = Znew + Components(:,:,i);
+                polyMatrix = polyMatrix + Components(:,:,i);
             end
             
-            Zdiff = Znew - Zold;
-            
-%             disp("Z old:");
-%             disp(Zold);
-%             disp("\n");
-% 
-%             disp("Z New:");
-%             disp(Znew);
-%             disp("\n");
-%             
-%             disp("Matrix Comparison (Zdiff):");
-%             disp(Zdiff);
-%             disp("\n");
-
-            % Display the final Z matrices for the old way and new way
-            figure();
-            surf(X,Y,Zold);
-            title("Z old using symbols:");
+            % Display M and N the degree?
+            disp("M = " + M);
+            disp("N = " + N);
+            disp("\n");
             
             figure();
-            surf(X,Y,Znew);
-            title("Z new using matrices:");
+            surf(X, Y, polyMatrix);
+            title("2D Poly Matrix (MaxDeg X = " + MaxDegreeX + ...
+                ", MaxDeg Y = " + MaxDegreeY + ", M = " + imgObj.M +...
+                " pixels, N = " + imgObj.N + "pixels)");
+            xlabel("X");
+            ylabel("Y");
+            zlabel("Z (poly amplitude)");
         end
         
         % Get the X and Y Components matrix
@@ -251,6 +239,13 @@ classdef Poly2D < handle
         % Get the Component names vector (maps to Components matrix)
         function ComponentNames = getComponentNames(imgObj)
             ComponentNames = imgObj.ComponentNames;
+        end
+        
+        % Get the Vandermonde matrix containing 2D matrix of monomials
+        function [vanderMat, componentNames] = getVandermondeMatrix(imgObj)
+            % Get the Polynomial Matrix Components (ie. Vandermonde Matrix)
+            vanderMat = imgObj.MatrixForm;
+            componentNames = imgObj.ComponentNames;
         end
         
         % Get the X and Y input matrices from the meshgrid
@@ -269,7 +264,7 @@ classdef Poly2D < handle
         % TODO: How does this look visually? 1 poly per col? Or for
         % each entry in the Poly matrix we have an associated vector??
         % --------------------------------------------------------------
-        function [poly_matrix] = poly2Matrix(imgObj, groupN)           
+        function [poly_matrix] = poly2Matrix(imgObj)           
         end
 
         %% matrix2Components
@@ -281,7 +276,7 @@ classdef Poly2D < handle
         % TODO: How does this look visually? 1 poly per col? Or for
         % each entry in the Poly matrix we have an associated vector??
         % --------------------------------------------------------------
-        function poly = matrix2Poly(imgObj, matrix)
+        function poly = matrix2Poly(imgObj)
         end
       
     end % End of standard methods
