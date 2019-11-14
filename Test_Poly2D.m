@@ -39,7 +39,7 @@ disp(componentNames);
 disp("\n");
 
 % View the 2D poly in the meshgrid space
-polyObj.view2DPolyMatrix();
+% polyObj.view2DPolyMatrix();
 
 % ---------------------------------------------------------------
 % Test the least squares methods for linear and cubic functions
@@ -70,7 +70,16 @@ function testLinearFunction(A, X, Y, N)
     disp("------------------------------------");
     
     % Compute RCN params for RCN values
-    computeRCNParams(A, b);
+    [kappa, theta, eta] = computeRCNParams(A, b);
+    [rcn1, rcn2, rcn3, rcn4] = computeRCNLS(kappa, theta, eta);
+    disp("Linear Function F1 RCN Values:");
+    disp("RCN1 (y = AA^+b as func of b)     = " + rcn1);
+    disp("RCN2 (x^+ = A^+b as func of b)    = " + rcn2);
+    disp("RCN3 (y = AA^+b as func of A)     = " + rcn3);
+    disp("RCN4 (x^+ = A^+b as func of A)    = " + rcn4);
+    disp("=> RCN1 < RCN3 (satisfying Property 3 in NLA)");
+    disp("=> RCN4 < RCN2 (satisfying Property 2 in NLA)");
+    disp("-------------------------------------------");
     
     % Compute least squares using 3 methods
     computeQRFactorization(A, b, N);
@@ -94,7 +103,16 @@ function testCubicFunction(A, X, Y, N)
     disp("------------------------------------");
     
     % Compute RCN params for RCN values
-    computeRCNParams(A, b);
+    [kappa, theta, eta] = computeRCNParams(A, b);
+    [rcn1, rcn2, rcn3, rcn4] = computeRCNLS(kappa, theta, eta);
+    disp("Cubic Function F2 RCN Values:");
+    disp("RCN1 (y = AA^+b as func of b)     = " + rcn1);
+    disp("RCN2 (x^+ = A^+b as func of b)    = " + rcn2);
+    disp("RCN3 (y = AA^+b as func of A)     = " + rcn3);
+    disp("RCN4 (x^+ = A^+b as func of A)    = " + rcn4);
+    disp("=> RCN1 < RCN3 (satisfying Property 3 in NLA)");
+    disp("=> RCN4 < RCN2 (satisfying Property 2 in NLA)");
+    disp("-------------------------------------------");
     
     % Compute least squares using 3 methods
     computeQRFactorization(A, b, N);
@@ -103,7 +121,7 @@ function testCubicFunction(A, X, Y, N)
 end
 
 % Compute the RCN parameters (kapp, theta, eta)
-function computeRCNParams(A, b)
+function [kappa, theta, eta] = computeRCNParams(A, b)
     % f Approx: solve the system of eqs
     x = A\b;
     y = A*x;
@@ -117,6 +135,21 @@ function computeRCNParams(A, b)
     disp(sprintf("eta   = %f", eta));
     disp("------------------------------------");
     disp("\n");
+end
+
+% Compute RCN LeastSquare values
+function [rcn1, rcn2, rcn3, rcn4] = computeRCNLS(kappa, theta, eta)
+    % RCN 1 y as function of b
+    rcn1 = 1/cos(theta);
+    
+    % RCN 2 x as function of b
+    rcn2 = kappa/(eta*cos(theta));
+    
+    % RCN 3 y as function of A 
+    rcn3 = kappa/cos(theta);
+    
+    % RCN 4 x as function of A
+    rcn4 = kappa + (kappa^2*tan(theta))/eta;
 end
 
 % Compute QR Factorization (Householder Triangulation)
@@ -147,10 +180,117 @@ end
 function computeSVD(A, b, N)
     disp("SVD:");
     tic
-    [U, S, V] = svd(A, 0);
-    x = V*(S\(U'*b));
+    % Reduced SVD
+    [Ur, Sr, Vr] = svd(A, 0);
+    r = rank(Sr);
+    xr = Vr*(Sr\(Ur'*b));
+    Vr = Vr';   % get the original Vr from Vr transpose
+    
+    % Full SVD
+    [Uf, Sf, Vf] = svd(A);
+    xf = Vf*(Sf\(Uf'*b));
+    Vf = Vf';   % get the original Vf from Vf transpose
     toc
-    disp(sprintf("SVD: x(%d) = %f", N, x(N)));
+    
+    % Reduced SVD
+    disp("Sr:");
+    disp(size(Sr));
+    disp(Sr);
+    disp("\n");
+    disp("Ur:");
+    disp("rank(Ur) = " + rank(Ur));
+    disp(size(Ur))
+    disp(Ur);
+    disp("\n");
+    disp("rank(Vr) = " + rank(Vr));
+    disp(size(Vr));
+    disp(Vr);
+    disp("\n");
+    
+    % Full SVD (1 to r, r+1 to n and equally with rows)
+    disp("Sf:");
+    disp(size(Sf));
+    disp(Sf);
+    disp("\n");
+    disp("Uf:");
+    disp("rank(Uf) = " + rank(Uf));
+    disp(size(Uf))
+    disp(Uf);
+    disp("\n");
+    disp("rank(Vf) = " + rank(Vf));
+    disp(size(Vf));
+    disp(Vf);
+    disp("\n");
+
+    
+    % Partition Uf into U1 and U2 for first r cols and last m - r
+    [m, n] = size(Uf);
+    idx1 = 1:r;
+    idx2 = (r+1):m;
+    U1 = Uf(:,idx1);
+    U2 = Uf(:,idx2);
+    disp("U1 size:");
+    disp(size(U1));
+    disp("U2 size:");
+    disp(size(U2));
+    disp("m - r = " + (m-r));
+    disp("U2:");
+    disp(U2);
+    disp("\n");
+    
+    % Partition Vf into V1 and V2 first 
+    [m, n] = size(Vf);
+    if m == r
+        disp("Vf FULL RANK!");
+        V1 = Vf(:,1:r);
+        V2 = V1;
+    else
+        idx1 = 1:r;
+        idx2 = (r+1):m;
+        V1 = Vf(:,idx1);
+        V2 = Vf(:,idx2);
+    end
+    disp("rank = " + r);
+    disp("V1 size:");
+    disp(size(V1));
+    disp(V1);
+    disp("\n");
+    disp("V2 size:");
+    disp(size(V2));
+    disp(V2);
+    disp("\n");
+    
+    % Create the basis vectors for col. space
+    BasisColSpace   = Ur;   % cols of Ur (full rank) form basis of col space
+    BasisRowSpace   = Vr;   % cols of Vr (full rank) form basis of row space
+    BasisNullSpace  = V2;   % cols of V2 partitioned form basis of null space
+    BasisLeftNullSpace = U2;    % cols of U2 form basis of left null space
+    
+    disp("Basis Col Space:");
+    disp("rank = " + rank(BasisColSpace));
+    disp(size(BasisColSpace));
+    disp(BasisColSpace);
+    disp("\n");
+    
+    disp("Basis Row Space:");
+    disp("rank = " + rank(BasisRowSpace));
+    disp(size(BasisRowSpace));
+    disp(BasisRowSpace);
+    disp("\n");
+    
+    disp("Basis Null Space:");
+    disp("rank = " + rank(BasisNullSpace));
+    disp(size(BasisNullSpace));
+    disp(BasisNullSpace);
+    disp("\n");
+    
+    disp("Basis Left Null Space:");
+    disp("rank = " + rank(BasisLeftNullSpace));
+    disp(size(BasisLeftNullSpace));
+    disp(BasisLeftNullSpace);
+    disp("\n");
+    
+    disp(sprintf("SVD: x(%d) = %f", N, xf(N)));
     disp("------------------------------------");
     disp("\n");
 end
