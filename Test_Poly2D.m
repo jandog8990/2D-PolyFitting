@@ -44,9 +44,9 @@ disp("\n");
 
 % Visualize the 2D poly components
 % polyObj.view2DPolyMatrix();
-title = "2D Polynomial";
-zString = "poly";
-polyObj.visAll(polyMatrix, title, zString);
+% title = "2D Polynomial";
+% zString = "poly";
+% polyObj.visAll(polyMatrix, title, zString);
 
 % ---------------------------------------------------------------
 % Test the least squares methods for linear and cubic functions
@@ -92,8 +92,8 @@ function testLinearFunction(polyObj, A, X, Y, IDX)
     
     % Compute least squares using 3 methods
     computeQRFactorization(polyObj, A, b, IDX);
-%     computeNormalEquations(polyObj, A, b, IDX);
-%     computeSVD(polyObj, A, b, IDX);
+    computeNormalEquations(polyObj, A, b, IDX);
+    computeSVD(polyObj, A, b, IDX);
 end
 
 % Test the cubic function f2(x,y)
@@ -184,7 +184,7 @@ function computeQRFactorization(polyObj, A, b, IDX)
     disp(size(R));
     disp(R);
     disp("\n");
-    
+
     % Matrix2Components on the Q orthonormal vector set
     QPolyMatrix = polyObj.matrix2Poly(Q);       % Q polynomial matrix
     QRPolyMatrix = polyObj.matrix2Poly(Q*R);    % should equal A
@@ -199,32 +199,17 @@ function computeQRFactorization(polyObj, A, b, IDX)
     disp(size(QRPolyMatrix));
     disp(QRPolyMatrix);
     disp("\n");
-    
+
     % Create the A matrix using the QR decomp
     QR = Q*R;
     err = QR*x - b;
     [M, N] = polyObj.getCoordinates();
     [X, Y] = polyObj.getXYData();
     rErr = reshape(err, M, N);  % reshape the error vector
-    disp("Coordinate PPixels:");
-    disp("[" + M + ", " + N + "]");
-    disp("\n");
-
-    disp("b:");
-    disp(b);
-    disp("\n");
-    disp("x:");
-    disp(x);
-    disp("\n");
     
     disp("Error = QR*x - b:");
     disp(size(rErr));
     disp(rErr);
-    disp("\n");
-    disp("X size:");
-    disp(size(X));
-    disp("Y size:");
-    disp(size(X));
     disp("\n");
 
     % Plot the error in the coordinate system (may want to use visall)
@@ -272,55 +257,34 @@ function computeSVD(polyObj, A, b, IDX)
     toc
     
     % Reduced SVD
-    disp("Sr:");
-    disp(size(Sr));
-    disp(Sr);
-    disp("\n");
     disp("Ur:");
     disp("rank(Ur) = " + rank(Ur));
     disp(size(Ur))
     disp(Ur);
     disp("\n");
+    
+    disp("Sr:");
+    disp("rank(Sr) = " + rank(Sr));
+    disp(size(Sr));
+    disp(Sr);
+    disp("\n");
+
+    disp("Vr:");
     disp("rank(Vr) = " + rank(Vr));
     disp(size(Vr));
     disp(Vr);
     disp("\n");
-    
-    % Full SVD (1 to r, r+1 to n and equally with rows)
-    disp("Sf:");
-    disp(size(Sf));
-    disp(Sf);
-    disp("\n");
-    disp("Uf:");
-    disp("rank(Uf) = " + rank(Uf));
-    disp(size(Uf))
-    disp(Uf);
-    disp("\n");
-    disp("rank(Vf) = " + rank(Vf));
-    disp(size(Vf));
-    disp(Vf);
-    disp("\n");
 
-    
     % Partition Uf into U1 and U2 for first r cols and last m - r
     [m, n] = size(Uf);
     idx1 = 1:r;
     idx2 = (r+1):m;
     U1 = Uf(:,idx1);
     U2 = Uf(:,idx2);
-    disp("U1 size:");
-    disp(size(U1));
-    disp("U2 size:");
-    disp(size(U2));
-    disp("m - r = " + (m-r));
-    disp("U2:");
-    disp(U2);
-    disp("\n");
     
     % Partition Vf into V1 and V2 first 
     [m, n] = size(Vf);
     if m == r
-        disp("Vf FULL RANK!");
         V1 = Vf(:,1:r);
         V2 = V1;
     else
@@ -329,15 +293,6 @@ function computeSVD(polyObj, A, b, IDX)
         V1 = Vf(:,idx1);
         V2 = Vf(:,idx2);
     end
-    disp("rank = " + r);
-    disp("V1 size:");
-    disp(size(V1));
-    disp(V1);
-    disp("\n");
-    disp("V2 size:");
-    disp(size(V2));
-    disp(V2);
-    disp("\n");
     
     % Create the basis vectors for col. space
     BasisColSpace   = Ur;   % cols of Ur (full rank) form basis of col space
@@ -345,29 +300,45 @@ function computeSVD(polyObj, A, b, IDX)
     BasisNullSpace  = V2;   % cols of V2 partitioned form basis of null space
     BasisLeftNullSpace = U2;    % cols of U2 form basis of left null space
     
-    disp("Basis Col Space:");
+    disp("Basis Col Space (Ur):");
     disp("rank = " + rank(BasisColSpace));
     disp(size(BasisColSpace));
     disp(BasisColSpace);
     disp("\n");
     
-    disp("Basis Row Space:");
+    % Create the poly matrix for the row space
+    colPolyMatrix = polyObj.matrix2Poly2(BasisColSpace);
+    polyObj.visAll(colPolyMatrix, "SVD: Column Basis", "col basis");
+    
+    disp("Basis Row Space (Vr):");
     disp("rank = " + rank(BasisRowSpace));
     disp(size(BasisRowSpace));
     disp(BasisRowSpace);
     disp("\n");
     
-    disp("Basis Null Space:");
+    % Create the poly matrix for the row space
+    rowPolyMatrix = polyObj.matrix2Poly2(BasisRowSpace);
+    polyObj.visAll(rowPolyMatrix, "SVD: Row Basis", "row basis");
+    
+    disp("Basis Null Space (V2):");
     disp("rank = " + rank(BasisNullSpace));
     disp(size(BasisNullSpace));
     disp(BasisNullSpace);
     disp("\n");
     
-    disp("Basis Left Null Space:");
+    % Create the poly matrix for the basis null
+    nullPolyMatrix = polyObj.matrix2Poly2(BasisNullSpace);
+    polyObj.visAll(nullPolyMatrix, "SVD: Null Basis", "null basis");
+    
+    disp("Basis Left Null Space (U2):");
     disp("rank = " + rank(BasisLeftNullSpace));
     disp(size(BasisLeftNullSpace));
     disp(BasisLeftNullSpace);
     disp("\n");
+
+    % Create the poly matrix for basis left null
+    leftNullPolyMatrix = polyObj.matrix2Poly2(BasisLeftNullSpace);
+    polyObj.visAll(leftNullPolyMatrix, "SVD: Left Null Basis", "left null basis");
     
     disp(sprintf("SVD: x(%d) = %f", IDX, xf(IDX)));
     disp("------------------------------------");

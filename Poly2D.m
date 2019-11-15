@@ -74,7 +74,7 @@ classdef Poly2D < handle
             % Setup the low and hi for x vector
             imgObj.x_low = x_low;
             imgObj.x_hi  = x_hi;
-            xlen = (abs(x_low) + abs(x_hi));
+            xlen = x_hi - x_low;
             xd = xlen/M;
             x_low = x_low+xd;
             imgObj.xvec = x_low:xd:x_hi;
@@ -82,16 +82,10 @@ classdef Poly2D < handle
             % Setup the low and hi for y vector
             imgObj.y_low = y_low;
             imgObj.y_hi  = y_hi;
-            ylen = (abs(y_low) + abs(y_hi));
+            ylen = y_hi - y_low;
             yd = ylen/N;
             y_low = y_low+yd;
             imgObj.yvec = y_low:yd:y_hi;
-            
-            disp("Set Rect Coords:");
-            disp("M, N = " + M + ", " + N);
-            disp("X vec len = " + length(imgObj.xvec));
-            disp("Y vec len = " + length(imgObj.yvec));
-            disp("\n");
             
             % Create the mesh grid for poly plots
             [imgObj.X, imgObj.Y] = meshgrid(imgObj.xvec, imgObj.yvec);
@@ -112,10 +106,6 @@ classdef Poly2D < handle
             imgObj.MaxDegreeY = MaxDegreeY;
             X = imgObj.X;
             Y = imgObj.Y;
-            disp("Set Components:");
-            disp("MaxDegreeX = " + MaxDegreeX);
-            disp("MaxDegreeY = " + MaxDegreeY);
-            disp("\n");
             
             % Create the component matrices
             syms x y mono
@@ -219,15 +209,6 @@ classdef Poly2D < handle
             disp("2D Poly Matrix:");
             disp(polyMatrix);
             disp("\n");
-            
-%             figure();
-%             surf(X, Y, polyMatrix);
-%             title("2D Poly Matrix (MaxDeg X = " + MaxDegreeX + ...
-%                 ", MaxDeg Y = " + MaxDegreeY + ", M = " + imgObj.M +...
-%                 " pixels, N = " + imgObj.N + "pixels)");
-%             xlabel("X");
-%             ylabel("Y");
-%             zlabel("Z (poly amplitude)");
         end
         
         % Get the X and Y Components matrix
@@ -299,35 +280,26 @@ classdef Poly2D < handle
                 % Sum the polynomail matrices (i.e. compr sum)
                 polyMatrix = polyMatrix + compr;
             end
-            
-            % initialize the system
-%             syms x y
-%             X = imgObj.X; Y = imgObj.Y;
-%             MaxDegreeX = imgObj.MaxDegreeX;
-%             MaxDegreeY = imgObj.MaxDegreeY;
-%             Components = imgObj.Components;
-% 
-%             % Sum: loop through all 2D matrices in the 3D mother
-%             [M,N,P] = size(Components);
-%             polyMatrix = zeros(M,N);
-%             for i = 1:1:P
-%                 polyMatrix = polyMatrix + Components(:,:,i);
-%             end
-%             
-%             % Display M and N the degree?
-%             disp("M = " + M);
-%             disp("N = " + N);
-%             disp("\n");
-%             
-%             figure();
-%             surf(X, Y, polyMatrix);
-%             title("2D Poly Matrix (MaxDeg X = " + MaxDegreeX + ...
-%                 ", MaxDeg Y = " + MaxDegreeY + ", M = " + imgObj.M +...
-%                 " pixels, N = " + imgObj.N + "pixels)");
-%             xlabel("X");
-%             ylabel("Y");
-%             zlabel("Z (poly amplitude)");
         end
-      
+        function polyMatrix = matrix2Poly2(imgObj, M)
+            [m, n] = size(M);
+            maxM = imgObj.M^2;
+            
+            % If the rows don't match the dimension of data append zeroes
+            if m ~= maxM
+                diffM = maxM - m;
+                M = [M; zeros(diffM, n)];
+            end
+            
+            % Loop through the input matrix M and create 3D components
+            polyMatrix = zeros(imgObj.M, imgObj.N);
+            for i = 1:1:n
+                % Reshape the column using given pixel dimensions
+                compr = reshape(M(:,i), imgObj.M, imgObj.N);
+                
+                % Sum the polynomail matrices (i.e. compr sum)
+                polyMatrix = polyMatrix + compr;
+            end
+        end
     end % End of standard methods
 end
