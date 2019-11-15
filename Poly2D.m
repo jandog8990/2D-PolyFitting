@@ -96,6 +96,8 @@ classdef Poly2D < handle
             
             % Create the mesh grid for poly plots
             [imgObj.X, imgObj.Y] = meshgrid(imgObj.xvec, imgObj.yvec);
+            disp("X Size:");disp(size(imgObj.X));
+            disp("Y Size:");disp(size(imgObj.Y));
         end
 
         %% setComponents():
@@ -283,30 +285,38 @@ classdef Poly2D < handle
             [m, n] = size(M);
             
             % Loop through the input matrix M and create 3D components
-            polyMatrix = zeros(imgObj.M, imgObj.N);
+            polyMatrix = zeros(imgObj.N, imgObj.M);
             for i = 1:1:n
                 % Reshape the column using given pixel dimensions
-                compr = reshape(M(:,i), imgObj.M, imgObj.N);
+                compr = reshape(M(:,i), imgObj.N, imgObj.M);
                 
                 % Sum the polynomail matrices (i.e. compr sum)
                 polyMatrix = polyMatrix + compr;
             end
         end
+        
         function polyMatrix = matrix2Poly2(imgObj, M)
+            disp("Matrix 2 Poly 2:");
             [m, n] = size(M);
-            maxM = imgObj.M^2;
+            maxMN = imgObj.M*imgObj.N;
+            disp("Max MN = " + maxMN);
             
             % If the rows don't match the dimension of data append zeroes
-            if m ~= maxM
-                diffM = maxM - m;
-                M = [M; zeros(diffM, n)];
+            if m ~= maxMN
+                diffMN = maxMN - m;
+                M = [M; zeros(diffMN, n)];
             end
             
+            disp("M size:");
+            disp(size(M));
+            disp("M = " + imgObj.M);
+            disp("N = " + imgObj.N);
+            
             % Loop through the input matrix M and create 3D components
-            polyMatrix = zeros(imgObj.M, imgObj.N);
+            polyMatrix = zeros(imgObj.N, imgObj.M);
             for i = 1:1:n
                 % Reshape the column using given pixel dimensions
-                compr = reshape(M(:,i), imgObj.M, imgObj.N);
+                compr = reshape(M(:,i), imgObj.N, imgObj.M);
                 
                 % Sum the polynomail matrices (i.e. compr sum)
                 polyMatrix = polyMatrix + compr;
