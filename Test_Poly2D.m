@@ -16,11 +16,11 @@ y_low = -2;
 y_hi = 2;
 
 % 2D poly max degrees
-MaxDegreeX = 2;
+MaxDegreeX = 5;
 MaxDegreeY = 2;
 
 % M and N represent pixel lengths along X & Y
-M = 5;
+M = 100;
 N = 5;
 
 % Create a generic 2d poly object
@@ -58,10 +58,10 @@ xmin = 1; xmax = length(componentNames);
 IDX = 1;
 
 % Test a linear function f1
-testLinearFunction(polyObj, A, X, Y, IDX);
+% testLinearFunction(polyObj, A, X, Y, IDX);
 
 % Test a cubic function f2
-% testCubicFunction(polyObj, A, X, Y, IDX);
+testCubicFunction(polyObj, A, X, Y, IDX);
 
 % Test the linear function f1(x,y)
 function testLinearFunction(polyObj, A, X, Y, IDX)
