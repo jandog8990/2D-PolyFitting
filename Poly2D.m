@@ -216,19 +216,18 @@ classdef Poly2D < handle
                 polyMatrix = polyMatrix + Components(:,:,i);
             end
             
-            % Display M and N the degree?
-            disp("M = " + M);
-            disp("N = " + N);
+            disp("2D Poly Matrix:");
+            disp(polyMatrix);
             disp("\n");
             
-            figure();
-            surf(X, Y, polyMatrix);
-            title("2D Poly Matrix (MaxDeg X = " + MaxDegreeX + ...
-                ", MaxDeg Y = " + MaxDegreeY + ", M = " + imgObj.M +...
-                " pixels, N = " + imgObj.N + "pixels)");
-            xlabel("X");
-            ylabel("Y");
-            zlabel("Z (poly amplitude)");
+%             figure();
+%             surf(X, Y, polyMatrix);
+%             title("2D Poly Matrix (MaxDeg X = " + MaxDegreeX + ...
+%                 ", MaxDeg Y = " + MaxDegreeY + ", M = " + imgObj.M +...
+%                 " pixels, N = " + imgObj.N + "pixels)");
+%             xlabel("X");
+%             ylabel("Y");
+%             zlabel("Z (poly amplitude)");
         end
         
         % Get the X and Y Components matrix
@@ -239,6 +238,12 @@ classdef Poly2D < handle
         % Get the Component names vector (maps to Components matrix)
         function ComponentNames = getComponentNames(imgObj)
             ComponentNames = imgObj.ComponentNames;
+        end
+        
+        % Get the rectangular coords used for the pixel images
+        function [M, N] = getCoordinates(imgObj)
+            M = imgObj.M;
+            N = imgObj.N;
         end
         
         % Get the Vandermonde matrix containing 2D matrix of monomials
@@ -254,6 +259,16 @@ classdef Poly2D < handle
             Y = imgObj.Y;
         end
         
+        %% Visualize all components in 2D poly matrix
+        function visAll(imgObj, poly, titleString, zString)
+            figure()
+            surf(imgObj.X, imgObj.Y, poly);
+            title(titleString);
+            xlabel("X");
+            ylabel("Y");
+            zlabel("Z (" + zString + ")");
+        end
+        
         %% components2Matrix
         % Components to matrix method for transferring the 2D polynomial 
         % to columns of 2D MatrixForm matrix
@@ -261,8 +276,6 @@ classdef Poly2D < handle
         % Input:
         %   poly - input polynomial
         %   groupN - the number of polynomial groups
-        % TODO: How does this look visually? 1 poly per col? Or for
-        % each entry in the Poly matrix we have an associated vector??
         % --------------------------------------------------------------
         function [poly_matrix] = poly2Matrix(imgObj)           
         end
@@ -273,10 +286,47 @@ classdef Poly2D < handle
         % 
         % Input:
         %   matrix - input 2D matrix with columns of polys
-        % TODO: How does this look visually? 1 poly per col? Or for
-        % each entry in the Poly matrix we have an associated vector??
         % --------------------------------------------------------------
-        function poly = matrix2Poly(imgObj)
+        function polyMatrix = matrix2Poly(imgObj, M)
+            [m, n] = size(M);
+            
+            % Loop through the input matrix M and create 3D components
+            polyMatrix = zeros(imgObj.M, imgObj.N);
+            for i = 1:1:n
+                % Reshape the column using given pixel dimensions
+                compr = reshape(M(:,i), imgObj.M, imgObj.N);
+                
+                % Sum the polynomail matrices (i.e. compr sum)
+                polyMatrix = polyMatrix + compr;
+            end
+            
+            % initialize the system
+%             syms x y
+%             X = imgObj.X; Y = imgObj.Y;
+%             MaxDegreeX = imgObj.MaxDegreeX;
+%             MaxDegreeY = imgObj.MaxDegreeY;
+%             Components = imgObj.Components;
+% 
+%             % Sum: loop through all 2D matrices in the 3D mother
+%             [M,N,P] = size(Components);
+%             polyMatrix = zeros(M,N);
+%             for i = 1:1:P
+%                 polyMatrix = polyMatrix + Components(:,:,i);
+%             end
+%             
+%             % Display M and N the degree?
+%             disp("M = " + M);
+%             disp("N = " + N);
+%             disp("\n");
+%             
+%             figure();
+%             surf(X, Y, polyMatrix);
+%             title("2D Poly Matrix (MaxDeg X = " + MaxDegreeX + ...
+%                 ", MaxDeg Y = " + MaxDegreeY + ", M = " + imgObj.M +...
+%                 " pixels, N = " + imgObj.N + "pixels)");
+%             xlabel("X");
+%             ylabel("Y");
+%             zlabel("Z (poly amplitude)");
         end
       
     end % End of standard methods

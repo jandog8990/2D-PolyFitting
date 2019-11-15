@@ -34,28 +34,37 @@ polyObj = Poly2D(x_low, x_hi, y_low, y_hi, ...
 % and concatenate in order to form the Vandermonde matrix
 [vanderMat, componentNames] = polyObj.getVandermondeMatrix();
 A = vanderMat;
-disp("Vandermonde Matrix:");
-disp(componentNames);
-disp("\n");
 
 % View the 2D poly in the meshgrid space
+polyMatrix = polyObj.matrix2Poly(A);
+disp("2D Poly Matrix:");
+disp(size(polyMatrix));
+disp(polyMatrix);
+disp("\n");
+
+% Visualize the 2D poly components
 % polyObj.view2DPolyMatrix();
+title = "2D Polynomial";
+zString = "poly";
+polyObj.visAll(polyMatrix, title, zString);
 
 % ---------------------------------------------------------------
 % Test the least squares methods for linear and cubic functions
 % ---------------------------------------------------------------
 
 % Evaluation pt for the output x vector
-N = 1;
+xmin = 1; xmax = length(componentNames);
+% IDX = randi([xmin, xmax]);  % sample index of sol. vector x
+IDX = 1;
 
 % Test a linear function f1
-testLinearFunction(A, X, Y, N);
+testLinearFunction(polyObj, A, X, Y, IDX);
 
 % Test a cubic function f2
-testCubicFunction(A, X, Y, N);
+% testCubicFunction(polyObj, A, X, Y, IDX);
 
 % Test the linear function f1(x,y)
-function testLinearFunction(A, X, Y, N)
+function testLinearFunction(polyObj, A, X, Y, IDX)
     % Approx. function f1 for testing
     syms x y
     c = double(randn());
@@ -82,13 +91,13 @@ function testLinearFunction(A, X, Y, N)
     disp("-------------------------------------------");
     
     % Compute least squares using 3 methods
-    computeQRFactorization(A, b, N);
-    computeNormalEquations(A, b, N);
-    computeSVD(A, b, N);
+    computeQRFactorization(polyObj, A, b, IDX);
+%     computeNormalEquations(polyObj, A, b, IDX);
+%     computeSVD(polyObj, A, b, IDX);
 end
 
 % Test the cubic function f2(x,y)
-function testCubicFunction(A, X, Y, N)
+function testCubicFunction(polyObj, A, X, Y, IDX)
     % Approx. function f2 for testing
     syms x y
     c = double(randn());
@@ -115,9 +124,14 @@ function testCubicFunction(A, X, Y, N)
     disp("-------------------------------------------");
     
     % Compute least squares using 3 methods
-    computeQRFactorization(A, b, N);
-    computeNormalEquations(A, b, N);
-    computeSVD(A, b, N);
+    disp("A:");
+    disp(size(A));
+    disp(A);
+    disp("\n");
+    
+    computeQRFactorization(polyObj, A, b, IDX);
+%     computeNormalEquations(polyObj, A, b, IDX);
+%     computeSVD(polyObj, A, b, IDX);
 end
 
 % Compute the RCN parameters (kapp, theta, eta)
@@ -153,31 +167,96 @@ function [rcn1, rcn2, rcn3, rcn4] = computeRCNLS(kappa, theta, eta)
 end
 
 % Compute QR Factorization (Householder Triangulation)
-function computeQRFactorization(A, b, N)
+function computeQRFactorization(polyObj, A, b, IDX)
     disp("Householder Triangulation");
     tic
     [Q,R] = qr(A,0);
     x = R\(Q'*b);
     toc
-    disp(sprintf("QR: x(%d) = %f", N, x(N)));
+      
+    disp("Q:");
+    disp("rank(Q) = " + rank(Q));
+    disp(size(Q));
+    disp(Q);
+    disp("\n");
+    
+    disp("R:");
+    disp(size(R));
+    disp(R);
+    disp("\n");
+    
+    % Matrix2Components on the Q orthonormal vector set
+    QPolyMatrix = polyObj.matrix2Poly(Q);       % Q polynomial matrix
+    QRPolyMatrix = polyObj.matrix2Poly(Q*R);    % should equal A
+    
+    disp("Q Poly Matrix:");
+    disp(size(QPolyMatrix));
+    disp(QPolyMatrix);
+    disp("\n");
+    
+    % QR Poly Matrix should match the original 2D Poly Matrix
+    disp("QR Poly Matrix:");
+    disp(size(QRPolyMatrix));
+    disp(QRPolyMatrix);
+    disp("\n");
+    
+    % Create the A matrix using the QR decomp
+    QR = Q*R;
+    err = QR*x - b;
+    [M, N] = polyObj.getCoordinates();
+    [X, Y] = polyObj.getXYData();
+    rErr = reshape(err, M, N);  % reshape the error vector
+    disp("Coordinate PPixels:");
+    disp("[" + M + ", " + N + "]");
+    disp("\n");
+
+    disp("b:");
+    disp(b);
+    disp("\n");
+    disp("x:");
+    disp(x);
+    disp("\n");
+    
+    disp("Error = QR*x - b:");
+    disp(size(rErr));
+    disp(rErr);
+    disp("\n");
+    disp("X size:");
+    disp(size(X));
+    disp("Y size:");
+    disp(size(X));
+    disp("\n");
+
+    % Plot the error in the coordinate system (may want to use visall)
+    title1 = "Q Polynomial Matrix";
+    title2 = "QR Polynomial Matrix";
+    title3 = "Error: Ax - b = (Q*R)*x - b";
+    zString1 = "poly";
+    zString2 = "error";
+    
+    polyObj.visAll(QPolyMatrix, title1, zString1);
+    polyObj.visAll(QRPolyMatrix, title2, zString1);
+    polyObj.visAll(rErr, title3, zString2);
+    
+    disp(sprintf("QR: x(%d) = %f", IDX, x(IDX)));
     disp("------------------------------------");
     disp("\n");
 end
 
 % Compute the normal equations
-function computeNormalEquations(A, b, N)
+function computeNormalEquations(polyObj, A, b, IDX)
     disp("Normal Equations:");
     tic
     x = (A'*A)\(A'*b);
     toc
-    disp(sprintf("Norm. Eqns: x(%d) = %f", N, x(N)));
+    disp(sprintf("Norm. Eqns: x(%d) = %f", IDX, x(IDX)));
     disp("\n");
 
     disp("------------------------------------");
 end
 
 % Compute the SVD
-function computeSVD(A, b, N)
+function computeSVD(polyObj, A, b, IDX)
     disp("SVD:");
     tic
     % Reduced SVD
@@ -290,7 +369,7 @@ function computeSVD(A, b, N)
     disp(BasisLeftNullSpace);
     disp("\n");
     
-    disp(sprintf("SVD: x(%d) = %f", N, xf(N)));
+    disp(sprintf("SVD: x(%d) = %f", IDX, xf(IDX)));
     disp("------------------------------------");
     disp("\n");
 end
