@@ -37,13 +37,13 @@ A = vanderMat;
 
 % View the 2D poly in the meshgrid space
 polyMatrix = polyObj.matrix2Poly(A);
-% disp("2D Poly Matrix:");
-% disp(size(polyMatrix));
+disp("2D Poly Matrix:");
+disp(size(polyMatrix));
 % disp(polyMatrix);
-% disp("\n");
+disp("\n");
 
 % Visualize the 2D poly components
-polyObj.view2DPolyMatrix();
+% polyObj.view2DPolyMatrix();
 title = "2D Polynomial";
 zString = "poly";
 polyObj.visAll(polyMatrix, title, zString);
@@ -58,10 +58,10 @@ xmin = 1; xmax = length(componentNames);
 IDX = 1;
 
 % Test a linear function f1
-% testLinearFunction(polyObj, A, X, Y, IDX);
+testLinearFunction(polyObj, A, X, Y, IDX);
 
 % Test a cubic function f2
-testCubicFunction(polyObj, A, X, Y, IDX);
+% testCubicFunction(polyObj, A, X, Y, IDX);
 
 % Test the linear function f1(x,y)
 function testLinearFunction(polyObj, A, X, Y, IDX)
@@ -200,7 +200,7 @@ function computeQRFactorization(polyObj, A, b, IDX)
     err = QR*x - b;
     [M, N] = polyObj.getCoordinates();
     [X, Y] = polyObj.getXYData();
-    rErr = reshape(err, M, N);  % reshape the error vector
+    rErr = reshape(err, N, M);  % reshape the error vector
     
     disp("Error = QR*x - b:");
     disp(size(rErr));
