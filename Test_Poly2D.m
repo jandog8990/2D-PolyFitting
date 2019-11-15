@@ -37,16 +37,16 @@ A = vanderMat;
 
 % View the 2D poly in the meshgrid space
 polyMatrix = polyObj.matrix2Poly(A);
-disp("2D Poly Matrix:");
-disp(size(polyMatrix));
-disp(polyMatrix);
-disp("\n");
+% disp("2D Poly Matrix:");
+% disp(size(polyMatrix));
+% disp(polyMatrix);
+% disp("\n");
 
 % Visualize the 2D poly components
-% polyObj.view2DPolyMatrix();
-% title = "2D Polynomial";
-% zString = "poly";
-% polyObj.visAll(polyMatrix, title, zString);
+polyObj.view2DPolyMatrix();
+title = "2D Polynomial";
+zString = "poly";
+polyObj.visAll(polyMatrix, title, zString);
 
 % ---------------------------------------------------------------
 % Test the least squares methods for linear and cubic functions
@@ -58,10 +58,10 @@ xmin = 1; xmax = length(componentNames);
 IDX = 1;
 
 % Test a linear function f1
-testLinearFunction(polyObj, A, X, Y, IDX);
+% testLinearFunction(polyObj, A, X, Y, IDX);
 
 % Test a cubic function f2
-% testCubicFunction(polyObj, A, X, Y, IDX);
+testCubicFunction(polyObj, A, X, Y, IDX);
 
 % Test the linear function f1(x,y)
 function testLinearFunction(polyObj, A, X, Y, IDX)
@@ -124,14 +124,9 @@ function testCubicFunction(polyObj, A, X, Y, IDX)
     disp("-------------------------------------------");
     
     % Compute least squares using 3 methods
-    disp("A:");
-    disp(size(A));
-    disp(A);
-    disp("\n");
-    
     computeQRFactorization(polyObj, A, b, IDX);
-%     computeNormalEquations(polyObj, A, b, IDX);
-%     computeSVD(polyObj, A, b, IDX);
+    computeNormalEquations(polyObj, A, b, IDX);
+    computeSVD(polyObj, A, b, IDX);
 end
 
 % Compute the RCN parameters (kapp, theta, eta)
@@ -177,12 +172,12 @@ function computeQRFactorization(polyObj, A, b, IDX)
     disp("Q:");
     disp("rank(Q) = " + rank(Q));
     disp(size(Q));
-    disp(Q);
+%     disp(Q);
     disp("\n");
     
     disp("R:");
     disp(size(R));
-    disp(R);
+%     disp(R);
     disp("\n");
 
     % Matrix2Components on the Q orthonormal vector set
@@ -191,13 +186,13 @@ function computeQRFactorization(polyObj, A, b, IDX)
     
     disp("Q Poly Matrix:");
     disp(size(QPolyMatrix));
-    disp(QPolyMatrix);
+%     disp(QPolyMatrix);
     disp("\n");
     
     % QR Poly Matrix should match the original 2D Poly Matrix
     disp("QR Poly Matrix:");
     disp(size(QRPolyMatrix));
-    disp(QRPolyMatrix);
+%     disp(QRPolyMatrix);
     disp("\n");
 
     % Create the A matrix using the QR decomp
@@ -209,7 +204,7 @@ function computeQRFactorization(polyObj, A, b, IDX)
     
     disp("Error = QR*x - b:");
     disp(size(rErr));
-    disp(rErr);
+%     disp(rErr);
     disp("\n");
 
     % Plot the error in the coordinate system (may want to use visall)
@@ -260,19 +255,19 @@ function computeSVD(polyObj, A, b, IDX)
     disp("Ur:");
     disp("rank(Ur) = " + rank(Ur));
     disp(size(Ur))
-    disp(Ur);
+%     disp(Ur);
     disp("\n");
     
     disp("Sr:");
     disp("rank(Sr) = " + rank(Sr));
     disp(size(Sr));
-    disp(Sr);
+%     disp(Sr);
     disp("\n");
 
     disp("Vr:");
     disp("rank(Vr) = " + rank(Vr));
     disp(size(Vr));
-    disp(Vr);
+%     disp(Vr);
     disp("\n");
 
     % Partition Uf into U1 and U2 for first r cols and last m - r
@@ -303,7 +298,7 @@ function computeSVD(polyObj, A, b, IDX)
     disp("Basis Col Space (Ur):");
     disp("rank = " + rank(BasisColSpace));
     disp(size(BasisColSpace));
-    disp(BasisColSpace);
+%     disp(BasisColSpace);
     disp("\n");
     
     % Create the poly matrix for the row space
@@ -313,7 +308,7 @@ function computeSVD(polyObj, A, b, IDX)
     disp("Basis Row Space (Vr):");
     disp("rank = " + rank(BasisRowSpace));
     disp(size(BasisRowSpace));
-    disp(BasisRowSpace);
+%     disp(BasisRowSpace);
     disp("\n");
     
     % Create the poly matrix for the row space
@@ -323,7 +318,7 @@ function computeSVD(polyObj, A, b, IDX)
     disp("Basis Null Space (V2):");
     disp("rank = " + rank(BasisNullSpace));
     disp(size(BasisNullSpace));
-    disp(BasisNullSpace);
+%     disp(BasisNullSpace);
     disp("\n");
     
     % Create the poly matrix for the basis null
@@ -333,7 +328,7 @@ function computeSVD(polyObj, A, b, IDX)
     disp("Basis Left Null Space (U2):");
     disp("rank = " + rank(BasisLeftNullSpace));
     disp(size(BasisLeftNullSpace));
-    disp(BasisLeftNullSpace);
+%     disp(BasisLeftNullSpace);
     disp("\n");
 
     % Create the poly matrix for basis left null
