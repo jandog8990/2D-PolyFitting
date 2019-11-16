@@ -66,14 +66,10 @@ classdef Poly2D < handle
         % This function generates a rectangular coordinate system.
         % Inputs:  x_low, x_hi, y_low, y_hi.
         % Outputs: X, Y coordinates stored internally.
-        function [] = setRectCoords(imgObj, x_low, x_hi, y_low, y_hi, M, N)
-            disp("Set Rect Coords:");
-            
+        function [] = setRectCoords(imgObj, x_low, x_hi, y_low, y_hi, M, N)            
             % Set pixel lengths along axes
             imgObj.M = M;
             imgObj.N = N;
-            disp("M = " + M);
-            disp("N = " + N);
             
             % Setup the low and hi for x vector
             imgObj.x_low = x_low;
@@ -82,7 +78,6 @@ classdef Poly2D < handle
             xd = xlen/M;
             x_low = x_low+xd;
             imgObj.xvec = x_low:xd:x_hi;
-            disp("Xvec length = " + length(imgObj.xvec));
             
             % Setup the low and hi for y vector
             imgObj.y_low = y_low;
@@ -91,13 +86,10 @@ classdef Poly2D < handle
             yd = ylen/N;
             y_low = y_low+yd;
             imgObj.yvec = y_low:yd:y_hi;
-            disp("Yvec length = " + length(imgObj.yvec));
 
             
             % Create the mesh grid for poly plots
             [imgObj.X, imgObj.Y] = meshgrid(imgObj.xvec, imgObj.yvec);
-            disp("X Size:");disp(size(imgObj.X));
-            disp("Y Size:");disp(size(imgObj.Y));
         end
 
         %% setComponents():
@@ -247,14 +239,6 @@ classdef Poly2D < handle
         
         %% Visualize all components in 2D poly matrix
         function visAll(imgObj, poly, titleString, zString)
-            disp("Poly Matrix (size):");
-            disp(size(poly));
-            disp("X size:");
-            disp(size(imgObj.X));
-            disp("Y size:");
-            disp(size(imgObj.Y));
-            disp("\n");
-            
             figure()
             surf(imgObj.X, imgObj.Y, poly);
             title(titleString);
@@ -296,21 +280,14 @@ classdef Poly2D < handle
         end
         
         function polyMatrix = matrix2Poly2(imgObj, M)
-            disp("Matrix 2 Poly 2:");
             [m, n] = size(M);
             maxMN = imgObj.M*imgObj.N;
-            disp("Max MN = " + maxMN);
             
             % If the rows don't match the dimension of data append zeroes
             if m ~= maxMN
                 diffMN = maxMN - m;
                 M = [M; zeros(diffMN, n)];
             end
-            
-            disp("M size:");
-            disp(size(M));
-            disp("M = " + imgObj.M);
-            disp("N = " + imgObj.N);
             
             % Loop through the input matrix M and create 3D components
             polyMatrix = zeros(imgObj.N, imgObj.M);

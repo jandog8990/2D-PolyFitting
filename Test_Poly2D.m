@@ -35,12 +35,16 @@ polyObj = Poly2D(x_low, x_hi, y_low, y_hi, ...
 [vanderMat, componentNames] = polyObj.getVandermondeMatrix();
 A = vanderMat;
 
+% disp("Vandermonde Matrix:");
+% disp(A);
+% disp("\n");
+
 % View the 2D poly in the meshgrid space
 polyMatrix = polyObj.matrix2Poly(A);
-disp("2D Poly Matrix:");
-disp(size(polyMatrix));
+% disp("2D Poly Matrix:");
+% disp(size(polyMatrix));
 % disp(polyMatrix);
-disp("\n");
+% disp("\n");
 
 % Visualize the 2D poly components
 % polyObj.view2DPolyMatrix();
@@ -169,31 +173,32 @@ function computeQRFactorization(polyObj, A, b, IDX)
     x = R\(Q'*b);
     toc
       
-    disp("Q:");
-    disp("rank(Q) = " + rank(Q));
-    disp(size(Q));
+%     disp("Q:");
+%     disp("rank(Q) = " + rank(Q));
+%     disp(size(Q));
 %     disp(Q);
-    disp("\n");
+%     disp("\n");
     
-    disp("R:");
-    disp(size(R));
+%     disp("R:");
+%     disp(size(R));
 %     disp(R);
-    disp("\n");
+%     disp("\n");
 
     % Matrix2Components on the Q orthonormal vector set
     QPolyMatrix = polyObj.matrix2Poly(Q);       % Q polynomial matrix
     QRPolyMatrix = polyObj.matrix2Poly(Q*R);    % should equal A
     
-    disp("Q Poly Matrix:");
-    disp(size(QPolyMatrix));
+%     % Q 2D Poly matrix for plotting
+%     disp("Q Poly Matrix:");
+%     disp(size(QPolyMatrix));
 %     disp(QPolyMatrix);
-    disp("\n");
-    
-    % QR Poly Matrix should match the original 2D Poly Matrix
-    disp("QR Poly Matrix:");
-    disp(size(QRPolyMatrix));
+%     disp("\n");
+%     
+%     % QR Poly Matrix should match the original 2D Poly Matrix
+%     disp("QR Poly Matrix:");
+%     disp(size(QRPolyMatrix));
 %     disp(QRPolyMatrix);
-    disp("\n");
+%     disp("\n");
 
     % Create the A matrix using the QR decomp
     QR = Q*R;
@@ -202,10 +207,10 @@ function computeQRFactorization(polyObj, A, b, IDX)
     [X, Y] = polyObj.getXYData();
     rErr = reshape(err, N, M);  % reshape the error vector
     
-    disp("Error = QR*x - b:");
-    disp(size(rErr));
+%     disp("Error = QR*x - b:");
+%     disp(size(rErr));
 %     disp(rErr);
-    disp("\n");
+%     disp("\n");
 
     % Plot the error in the coordinate system (may want to use visall)
     title1 = "Q Polynomial Matrix";
@@ -218,7 +223,8 @@ function computeQRFactorization(polyObj, A, b, IDX)
     polyObj.visAll(QRPolyMatrix, title2, zString1);
     polyObj.visAll(rErr, title3, zString2);
     
-    disp(sprintf("QR: x(%d) = %f", IDX, x(IDX)));
+    disp("QR solution x:");
+    disp(x');
     disp("------------------------------------");
     disp("\n");
 end
@@ -229,7 +235,8 @@ function computeNormalEquations(polyObj, A, b, IDX)
     tic
     x = (A'*A)\(A'*b);
     toc
-    disp(sprintf("Norm. Eqns: x(%d) = %f", IDX, x(IDX)));
+    disp("Normal Equation solution x:");
+    disp(x');
     disp("\n");
 
     disp("------------------------------------");
@@ -251,24 +258,12 @@ function computeSVD(polyObj, A, b, IDX)
     Vf = Vf';   % get the original Vf from Vf transpose
     toc
     
-    % Reduced SVD
-    disp("Ur:");
-    disp("rank(Ur) = " + rank(Ur));
-    disp(size(Ur))
-%     disp(Ur);
-    disp("\n");
-    
-    disp("Sr:");
-    disp("rank(Sr) = " + rank(Sr));
-    disp(size(Sr));
+    % Reduced SVD diagonal matrix
+%     disp("Sr:");
+%     disp("rank(Sr) = " + rank(Sr));
+%     disp(size(Sr));
 %     disp(Sr);
-    disp("\n");
-
-    disp("Vr:");
-    disp("rank(Vr) = " + rank(Vr));
-    disp(size(Vr));
-%     disp(Vr);
-    disp("\n");
+%     disp("\n");
 
     % Partition Uf into U1 and U2 for first r cols and last m - r
     [m, n] = size(Uf);
@@ -295,47 +290,48 @@ function computeSVD(polyObj, A, b, IDX)
     BasisNullSpace  = V2;   % cols of V2 partitioned form basis of null space
     BasisLeftNullSpace = U2;    % cols of U2 form basis of left null space
     
-    disp("Basis Col Space (Ur):");
-    disp("rank = " + rank(BasisColSpace));
-    disp(size(BasisColSpace));
+%     disp("Basis Col Space (Ur):");
+%     disp("rank = " + rank(BasisColSpace));
+%     disp(size(BasisColSpace));
 %     disp(BasisColSpace);
-    disp("\n");
+%     disp("\n");
     
     % Create the poly matrix for the row space
     colPolyMatrix = polyObj.matrix2Poly2(BasisColSpace);
     polyObj.visAll(colPolyMatrix, "SVD: Column Basis", "col basis");
     
-    disp("Basis Row Space (Vr):");
-    disp("rank = " + rank(BasisRowSpace));
-    disp(size(BasisRowSpace));
+%     disp("Basis Row Space (Vr):");
+%     disp("rank = " + rank(BasisRowSpace));
+%     disp(size(BasisRowSpace));
 %     disp(BasisRowSpace);
-    disp("\n");
+%     disp("\n");
     
     % Create the poly matrix for the row space
     rowPolyMatrix = polyObj.matrix2Poly2(BasisRowSpace);
     polyObj.visAll(rowPolyMatrix, "SVD: Row Basis", "row basis");
     
-    disp("Basis Null Space (V2):");
-    disp("rank = " + rank(BasisNullSpace));
-    disp(size(BasisNullSpace));
+%     disp("Basis Null Space (V2):");
+%     disp("rank = " + rank(BasisNullSpace));
+%     disp(size(BasisNullSpace));
 %     disp(BasisNullSpace);
-    disp("\n");
+%     disp("\n");
     
     % Create the poly matrix for the basis null
     nullPolyMatrix = polyObj.matrix2Poly2(BasisNullSpace);
     polyObj.visAll(nullPolyMatrix, "SVD: Null Basis", "null basis");
     
-    disp("Basis Left Null Space (U2):");
-    disp("rank = " + rank(BasisLeftNullSpace));
-    disp(size(BasisLeftNullSpace));
+%     disp("Basis Left Null Space (U2):");
+%     disp("rank = " + rank(BasisLeftNullSpace));
+%     disp(size(BasisLeftNullSpace));
 %     disp(BasisLeftNullSpace);
-    disp("\n");
+%     disp("\n");
 
     % Create the poly matrix for basis left null
     leftNullPolyMatrix = polyObj.matrix2Poly2(BasisLeftNullSpace);
     polyObj.visAll(leftNullPolyMatrix, "SVD: Left Null Basis", "left null basis");
     
-    disp(sprintf("SVD: x(%d) = %f", IDX, xf(IDX)));
+    disp("SVD solution x:");
+    disp(xf');
     disp("------------------------------------");
     disp("\n");
 end
